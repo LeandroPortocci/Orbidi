@@ -8,7 +8,7 @@ resource "aws_db_instance" "rds" {
   storage_type         = "gp2"
   engine               = var.engine
   instance_class       = var.instance_class
-  name                 = var.db_name
+  db_name                = var.db_name
   username             = var.username
   password             = var.password
   db_subnet_group_name = aws_db_subnet_group.rds.name
