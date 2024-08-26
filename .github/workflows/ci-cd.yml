@@ -51,34 +51,106 @@ jobs:
           docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/django-app:${{ github.ref_name }}
           docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/django-app:${{ github.ref_name }}
 
-      - name: Deploy FastAPI service to ECS
-        if: ${{ github.event.inputs.environment == 'development' }}
+      - name: Check and create ECS FastAPI service
+        if: github.ref == 'refs/heads/development'
         run: |
+          # Check if service exists
+          SERVICE_ARN=$(aws ecs list-services --cluster development-cluster --region us-east-2 --query "serviceArns[?contains(@, 'fastapi-service-development')]" --output text)
+          
+          # Create the service if it does not exist
+          if [ -z "$SERVICE_ARN" ]; then
+            echo "Service not found. Creating the FastAPI service..."
+            aws ecs create-service \
+              --cluster development-cluster \
+              --service-name fastapi-service-development \
+              --task-definition fastapi-task \
+              --desired-count 1 \
+              --launch-type EC2 \
+              --region us-east-2
+          else
+            echo "Service already exists."
+          fi
+
+          # Update the FastAPI service
           aws ecs update-service --cluster development-cluster --service fastapi-service-development --force-new-deployment --region us-east-2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Deploy Django service to ECS
-        if: ${{ github.event.inputs.environment == 'development' }}
+      - name: Check and create ECS Django service
+        if: github.ref == 'refs/heads/development'
         run: |
+          # Check if service exists
+          SERVICE_ARN=$(aws ecs list-services --cluster development-cluster --region us-east-2 --query "serviceArns[?contains(@, 'django-service-development')]" --output text)
+          
+          # Create the service if it does not exist
+          if [ -z "$SERVICE_ARN" ]; then
+            echo "Service not found. Creating the Django service..."
+            aws ecs create-service \
+              --cluster development-cluster \
+              --service-name django-service-development \
+              --task-definition django-task \
+              --desired-count 1 \
+              --launch-type EC2 \
+              --region us-east-2
+          else
+            echo "Service already exists."
+          fi
+
+          # Update the Django service
           aws ecs update-service --cluster development-cluster --service django-service-development --force-new-deployment --region us-east-2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Deploy FastAPI service to ECS
-        if: ${{ github.event.inputs.environment == 'production' }}
+      - name: Check and create ECS FastAPI service (Production)
+        if: github.ref == 'refs/heads/main'
         run: |
-          aws ecs update-service --cluster production-cluster --service fastapi-service-production --force-new-deployment --region us-east-2
+          # Check if service exists
+          SERVICE_ARN=$(aws ecs list-services --cluster production-cluster --region us-west-1 --query "serviceArns[?contains(@, 'fastapi-service-production')]" --output text)
+          
+          # Create the service if it does not exist
+          if [ -z "$SERVICE_ARN" ]; then
+            echo "Service not found. Creating the FastAPI service..."
+            aws ecs create-service \
+              --cluster production-cluster \
+              --service-name fastapi-service-production \
+              --task-definition fastapi-task \
+              --desired-count 1 \
+              --launch-type EC2 \
+              --region us-west-1
+          else
+            echo "Service already exists."
+          fi
+
+          # Update the FastAPI service
+          aws ecs update-service --cluster production-cluster --service fastapi-service-production --force-new-deployment --region us-west-1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Deploy Django service to ECS
-        if: ${{ github.event.inputs.environment == 'production' }}
+      - name: Check and create ECS Django service (Production)
+        if: github.ref == 'refs/heads/main'
         run: |
-          aws ecs update-service --cluster production-cluster --service django-service-production --force-new-deployment --region us-east-2
+          # Check if service exists
+          SERVICE_ARN=$(aws ecs list-services --cluster production-cluster --region us-west-1 --query "serviceArns[?contains(@, 'django-service-production')]" --output text)
+          
+          # Create the service if it does not exist
+          if [ -z "$SERVICE_ARN" ]; then
+            echo "Service not found. Creating the Django service..."
+            aws ecs create-service \
+              --cluster production-cluster \
+              --service-name django-service-production \
+              --task-definition django-task \
+              --desired-count 1 \
+              --launch-type EC2 \
+              --region us-west-1
+          else
+            echo "Service already exists."
+          fi
+
+          # Update the Django service
+          aws ecs update-service --cluster production-cluster --service django-service-production --force-new-deployment --region us-west-1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
