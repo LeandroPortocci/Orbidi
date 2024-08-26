@@ -43,14 +43,15 @@ jobs:
       - name: Clean Environment Variables
         run: |
           unset TF_WORKSPACE
-          echo "TF_WORKSPACE unset"
         working-directory: ${{ env.TF_DIR }}
 
       - name: Select or Create Terraform Workspace
         run: |
-          echo "Selecting or creating workspace: ${{ env.TF_WORKSPACE }}"
-          terraform workspace list | grep -q ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
-          terraform workspace select ${{ env.TF_WORKSPACE }}
+          if terraform workspace list | grep -q ${{ env.TF_WORKSPACE }}; then
+            terraform workspace select ${{ env.TF_WORKSPACE }}
+          else
+            terraform workspace new ${{ env.TF_WORKSPACE }}
+          fi
         working-directory: ${{ env.TF_DIR }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
