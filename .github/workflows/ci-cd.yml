@@ -52,14 +52,14 @@ jobs:
           docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/django-app:$IMAGE_TAG
         
 
-      - name: Deploy FastAPI service to ECS
-        if: github.ref == 'refs/heads/development'
-        run: |
-          aws ecs update-service --cluster development-cluster --service fastapi-service-development --force-new-deployment --region us-east-2
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
+          - name: Deploy FastAPI service to ECS
+          if: github.ref == 'refs/heads/development'
+          run: |
+            aws ecs update-service --cluster development-cluster --service fastapi-service-development --force-new-deployment --region us-east-2
+          env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        
       - name: Deploy Django service to ECS
         if: github.ref == 'refs/heads/development'
         run: |
@@ -67,7 +67,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
+      
       - name: Deploy FastAPI service to ECS
         if: github.ref == 'refs/heads/main'
         run: |
@@ -75,7 +75,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
+      
       - name: Deploy Django service to ECS
         if: github.ref == 'refs/heads/main'
         run: |
@@ -83,3 +83,4 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      
