@@ -13,6 +13,12 @@ on:
     paths:
       - 'django-app/**'
       - 'fastapi-app/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'The environment to deploy to'
+        required: true
+        default: 'development'
 
 jobs:
   build:
@@ -35,52 +41,44 @@ jobs:
         run: |
           cd fastapi-app
           docker build -t fastapi-app .
-          IMAGE_TAG=${{ github.ref_name }}
-          # Remove qualquer caractere inválido da tag
-          IMAGE_TAG=$(echo "$IMAGE_TAG" | sed 's/[^a-zA-Z0-9._-]/_/g')
-          docker tag fastapi-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/fastapi-app:$IMAGE_TAG
-          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/fastapi-app:$IMAGE_TAG
-          
+          docker tag fastapi-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:${{ github.ref_name }}
+          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:${{ github.ref_name }}
+
       - name: Build and push Django image
         run: |
           cd django-app
           docker build -t django-app .
-          IMAGE_TAG=${{ github.ref_name }}
-          # Remove qualquer caractere inválido da tag
-          IMAGE_TAG=$(echo "$IMAGE_TAG" | sed 's/[^a-zA-Z0-9._-]/_/g')
-          docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/django-app:$IMAGE_TAG
-          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/django-app:$IMAGE_TAG
-        
+          docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:${{ github.ref_name }}
+          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:${{ github.ref_name }}
 
-          - name: Deploy FastAPI service to ECS
-          if: github.ref == 'refs/heads/development'
-          run: |
-            aws ecs update-service --cluster development-cluster --service fastapi-service-development --force-new-deployment --region us-east-2
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        
+      - name: Deploy FastAPI service to ECS
+        if: ${{ github.event.inputs.environment == 'development' }}
+        run: |
+          aws ecs update-service --cluster development-cluster --service fastapi-service-development --force-new-deployment --region us-east-2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Deploy Django service to ECS
-        if: github.ref == 'refs/heads/development'
+        if: ${{ github.event.inputs.environment == 'development' }}
         run: |
           aws ecs update-service --cluster development-cluster --service django-service-development --force-new-deployment --region us-east-2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      
+
       - name: Deploy FastAPI service to ECS
-        if: github.ref == 'refs/heads/main'
+        if: ${{ github.event.inputs.environment == 'production' }}
         run: |
           aws ecs update-service --cluster production-cluster --service fastapi-service-production --force-new-deployment --region us-east-2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      
+
       - name: Deploy Django service to ECS
-        if: github.ref == 'refs/heads/main'
+        if: ${{ github.event.inputs.environment == 'production' }}
         run: |
           aws ecs update-service --cluster production-cluster --service django-service-production --force-new-deployment --region us-east-2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      
