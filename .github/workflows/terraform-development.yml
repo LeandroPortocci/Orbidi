@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - development
+    paths:
+      - 'terraform/environments/development/**'
   pull_request:
     branches:
       - development
-
+    paths:
+      - 'terraform/environments/development/**'
 jobs:
   terraform:
     name: Apply Terraform in Development

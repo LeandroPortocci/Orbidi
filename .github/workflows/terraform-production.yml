@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'terraform/environments/production/**'
   pull_request:
     branches:
       - main
-
+    paths:
+      - 'terraform/environments/production/**'
 jobs:
   terraform:
     name: Apply Terraform in Production
