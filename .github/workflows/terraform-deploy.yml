@@ -3,10 +3,10 @@ name: Terraform Deploy
 on:
   push:
     branches:
-      - main  # Ou o branch de sua escolha
+      - development  # Deploy automático no branch development
   pull_request:
     branches:
-      - main
+      - main  # Deploy após aprovação do PR para o branch main
 
 jobs:
   terraform:
@@ -20,17 +20,35 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.9.3  # Substitua pela versão do Terraform que você está usando
+          terraform_version: 1.5.0  # Substitua pela versão do Terraform que você está usando
+
+      - name: Determine Terraform Directory
+        id: tf-dir
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/development" ]; then
+            echo "TF_DIR=./terraform/environments/development" >> $GITHUB_ENV
+            echo "TF_WORKSPACE=development" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "TF_DIR=./terraform/environments/production" >> $GITHUB_ENV
+            echo "TF_WORKSPACE=production" >> $GITHUB_ENV
+          fi
 
       - name: Terraform Init
         run: terraform init
+        working-directory: ${{ env.TF_DIR }}
+
+      - name: Select Terraform Workspace
+        run: |
+          terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
+        working-directory: ${{ env.TF_DIR }}
 
       - name: Terraform Plan
         run: terraform plan
+        working-directory: ${{ env.TF_DIR }}
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
+        working-directory: ${{ env.TF_DIR }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
