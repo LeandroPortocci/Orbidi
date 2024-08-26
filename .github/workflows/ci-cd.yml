@@ -35,15 +35,22 @@ jobs:
         run: |
           cd fastapi-app
           docker build -t fastapi-app .
-          docker tag fastapi-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:${{ github.ref_name }}
-          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:${{ github.ref_name }}
-
+          IMAGE_TAG=${{ github.ref_name }}
+          # Remove qualquer caractere inválido da tag
+          IMAGE_TAG=$(echo "$IMAGE_TAG" | sed 's/[^a-zA-Z0-9._-]/_/g')
+          docker tag fastapi-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:$IMAGE_TAG
+          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:$IMAGE_TAG
+          
       - name: Build and push Django image
         run: |
           cd django-app
           docker build -t django-app .
-          docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:${{ github.ref_name }}
-          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:${{ github.ref_name }}
+          IMAGE_TAG=${{ github.ref_name }}
+          # Remove qualquer caractere inválido da tag
+          IMAGE_TAG=$(echo "$IMAGE_TAG" | sed 's/[^a-zA-Z0-9._-]/_/g')
+          docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:$IMAGE_TAG
+          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:$IMAGE_TAG
+        
 
       - name: Deploy FastAPI service to ECS
         if: github.ref == 'refs/heads/development'
