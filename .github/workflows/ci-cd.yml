@@ -41,15 +41,15 @@ jobs:
         run: |
           cd fastapi-app
           docker build -t fastapi-app .
-          docker tag fastapi-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:${{ github.ref_name }}
-          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:${{ github.ref_name }}
+          docker tag fastapi-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/fastapi-app:${{ github.ref_name }}
+          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/fastapi-app:${{ github.ref_name }}
 
       - name: Build and push Django image
         run: |
           cd django-app
           docker build -t django-app .
-          docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:${{ github.ref_name }}
-          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:${{ github.ref_name }}
+          docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/django-app:${{ github.ref_name }}
+          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/django-app:${{ github.ref_name }}
 
       - name: Deploy FastAPI service to ECS
         if: ${{ github.event.inputs.environment == 'development' }}
