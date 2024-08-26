@@ -33,9 +33,6 @@ jobs:
             echo "TF_WORKSPACE=production" >> $GITHUB_ENV
           fi
 
-      - name: Unset TF_WORKSPACE before selecting workspace
-        run: unset TF_WORKSPACE
-
       - name: Terraform Init
         run: terraform init
         working-directory: ${{ env.TF_DIR }}
@@ -43,8 +40,10 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Select Terraform Workspace
-        run: terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
+      - name: Select or Create Terraform Workspace
+        run: |
+          unset TF_WORKSPACE
+          terraform workspace select ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
         working-directory: ${{ env.TF_DIR }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
