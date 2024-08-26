@@ -20,7 +20,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.0
+          terraform_version: 1.9.3
 
       - name: Determine Terraform Directory and Workspace
         id: tf-env
@@ -42,7 +42,8 @@ jobs:
 
       - name: Select or Create Terraform Workspace
         run: |
-          echo "TF_WORKSPACE=${{ env.TF_WORKSPACE }}"
+          echo "Selecting or creating workspace: ${{ env.TF_WORKSPACE }}"
+          terraform workspace list | grep -q ${{ env.TF_WORKSPACE }} || terraform workspace new ${{ env.TF_WORKSPACE }}
           terraform workspace select ${{ env.TF_WORKSPACE }}
         working-directory: ${{ env.TF_DIR }}
         env:
