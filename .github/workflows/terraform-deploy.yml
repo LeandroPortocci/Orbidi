@@ -1,4 +1,4 @@
-name: Terraform Deploy
+name: Terraform Deploy - Development
 
 on:
   push:
@@ -6,11 +6,11 @@ on:
       - development
   pull_request:
     branches:
-      - main
+      - development
 
 jobs:
   terraform:
-    name: Apply Terraform
+    name: Apply Terraform in Development
     runs-on: ubuntu-latest
 
     steps:
@@ -22,51 +22,23 @@ jobs:
         with:
           terraform_version: 1.5.0
 
-      - name: Determine Terraform Directory and Workspace
-        id: tf-env
-        run: |
-          if [ "${{ github.ref }}" == "refs/heads/development" ]; then
-            echo "TF_DIR=./terraform/environments/development" >> $GITHUB_ENV
-            echo "TF_WORKSPACE=development" >> $GITHUB_ENV
-          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo "TF_DIR=./terraform/environments/production" >> $GITHUB_ENV
-            echo "TF_WORKSPACE=production" >> $GITHUB_ENV
-          fi
-
       - name: Terraform Init
         run: terraform init
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Clean Environment Variables
-        run: |
-          unset TF_WORKSPACE
-        working-directory: ${{ env.TF_DIR }}
-
-      - name: Select or Create Terraform Workspace
-        run: |
-          if terraform workspace list | grep -q ${{ env.TF_WORKSPACE }}; then
-            terraform workspace select ${{ env.TF_WORKSPACE }}
-          else
-            terraform workspace new ${{ env.TF_WORKSPACE }}
-          fi
-        working-directory: ${{ env.TF_DIR }}
+        working-directory: ./terraform/environments/development
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Terraform Plan
         run: terraform plan
-        working-directory: ${{ env.TF_DIR }}
+        working-directory: ./terraform/environments/development
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
-        working-directory: ${{ env.TF_DIR }}
+        working-directory: ./terraform/environments/development
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
