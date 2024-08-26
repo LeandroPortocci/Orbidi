@@ -3,7 +3,16 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
+      - development
+    paths:
+      - 'django-app/**'
+      - 'fastapi-app/**'
+  pull_request:
+    branches:
       - main
+    paths:
+      - 'django-app/**'
+      - 'fastapi-app/**'
 
 jobs:
   build:
@@ -26,26 +35,44 @@ jobs:
         run: |
           cd fastapi-app
           docker build -t fastapi-app .
-          docker tag fastapi-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:latest
-          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:latest
+          docker tag fastapi-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:${{ github.ref_name }}
+          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/fastapi-app:${{ github.ref_name }}
 
       - name: Build and push Django image
         run: |
           cd django-app
           docker build -t django-app .
-          docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:latest
-          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:latest
+          docker tag django-app:latest 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:${{ github.ref_name }}
+          docker push 061039781993.dkr.ecr.us-east-2.amazonaws.com/demoorbidi/django-app:${{ github.ref_name }}
 
       - name: Deploy FastAPI service to ECS
+        if: github.ref == 'refs/heads/development'
         run: |
-          aws ecs update-service --cluster app-cluster --service fastapi-service --force-new-deployment --region us-east-2
+          aws ecs update-service --cluster development-cluster --service fastapi-service-development --force-new-deployment --region us-east-2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Deploy Django service to ECS
+        if: github.ref == 'refs/heads/development'
         run: |
-          aws ecs update-service --cluster app-cluster --service django-service --force-new-deployment --region us-east-2
+          aws ecs update-service --cluster development-cluster --service django-service-development --force-new-deployment --region us-east-2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Deploy FastAPI service to ECS
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws ecs update-service --cluster production-cluster --service fastapi-service-production --force-new-deployment --region us-east-2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Deploy Django service to ECS
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws ecs update-service --cluster production-cluster --service django-service-production --force-new-deployment --region us-east-2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
