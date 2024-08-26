@@ -10,7 +10,7 @@ locals {
   desired_capacity = 2
   min_size         = 2
   max_size         = 5
-  alb_certificate_arn   = "arn:aws:acm:us-east-1:123456789012:certificate/abcd1234-ab12-cd34-ef56-abcdef123456"
+  alb_certificate_arn   = "arn:aws:acm:us-west-1:061039781993:certificate/1f3ae090-d0fc-4c27-9fc5-d5057d6deba5"
   rds_username          = "dev_user"
   rds_password          = "dev_password"
   db_name            = "mydb"

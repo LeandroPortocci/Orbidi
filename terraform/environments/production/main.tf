@@ -39,6 +39,7 @@ module "alb" {
   security_groups = module.vpc.alb_security_group_id
   security_group_ids = module.vpc.alb_security_group_id
   certificate_arn = local.alb_certificate_arn
+  https_certificate_arn = local.alb_certificate_arn
   environment = local.environment
 
 }

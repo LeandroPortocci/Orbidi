@@ -48,3 +48,8 @@ variable "security_group_ids" {
   description = "List of security group IDs"
   type        = list(string)
 }
+
+variable "https_certificate_arn" {
+  description = "ARN do certificado SSL/TLS para HTTPS"
+  type        = string
+}
