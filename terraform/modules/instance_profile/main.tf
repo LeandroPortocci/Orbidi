@@ -1,5 +1,5 @@
 resource "aws_iam_role" "this" {
-  name = "${var.name}_ecs_instance_role"
+  name = "${var.environment}_ecs_instance_role"
   path = "/ecs/"
 
   tags = var.tags
@@ -21,7 +21,7 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "this" {
-  name = "${var.name}_ecs_instance_profile"
+  name = "${var.environment}_ecs_instance_profile"
   role = aws_iam_role.this.name
 
   tags = var.tags

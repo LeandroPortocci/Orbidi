@@ -24,7 +24,7 @@ resource "aws_autoscaling_group" "ecs" {
 }
 
 resource "aws_iam_role" "ecs_instance_role" {
-  name = "ecsInstanceRole"
+  name = "ecs_instance_profile-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -41,6 +41,6 @@ resource "aws_iam_role" "ecs_instance_role" {
 }
 
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
-  name = "ecs_instance_profile"
+  name = "ecs_instance_profile-${var.environment}"
   role = aws_iam_role.ecs_instance_role.name
 }

@@ -5,7 +5,7 @@ locals {
   cidr_block = "10.1.0.0/16"
   public_subnet_cidrs = ["10.1.1.0/24", "10.1.2.0/24"]
   private_subnet_cidrs = ["10.1.3.0/24", "10.1.4.0/24"]
-  ecs_ami_id            = "ami-01dafc80107095530"
+  ecs_ami_id            = "ami-0ecaad63ed3668fca"
   ecs_instance_type     = "t3.micro"
   desired_capacity = 2
   min_size         = 2
@@ -19,7 +19,7 @@ locals {
   instance_class     = "db.t3.micro"
   multi_az           = false
   delete_final_snapshot = true
-  bastion_ami_id        = "ami-0c55b159cbfafe1f0"
+  bastion_ami_id        = "ami-0ecaad63ed3668fca"
   bastion_instance_type = "t2.micro"
   bastion_key_name      = "prod-key"
   name = terraform.workspace
