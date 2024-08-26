@@ -22,7 +22,7 @@ jobs:
         with:
           terraform_version: 1.5.0
 
-      - name: Determine Terraform Directory and Workspace
+      - name: Set Terraform Directory and Workspace
         id: tf-env
         run: |
           if [ "${{ github.ref }}" == "refs/heads/development" ]; then
